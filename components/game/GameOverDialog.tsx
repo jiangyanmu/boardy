@@ -31,7 +31,7 @@ export function GameOverDialog({ open, winner, score, onRestart }: GameOverDialo
                     <DialogTitle className="text-3xl font-black text-center tracking-tighter uppercase">
                         {getWinnerText()}
                     </DialogTitle>
-                    <DialogDescription className="text-center pt-4">
+                    <div className="text-center pt-4">
                         <div className="flex justify-around items-center">
                             <div className="flex flex-col items-center">
                                 <span className="text-sm font-medium uppercase text-zinc-500">Black</span>
@@ -43,7 +43,7 @@ export function GameOverDialog({ open, winner, score, onRestart }: GameOverDialo
                                 <span className="text-4xl font-bold">{score.WHITE}</span>
                             </div>
                         </div>
-                    </DialogDescription>
+                    </div>
                 </DialogHeader>
                 <DialogFooter className="sm:justify-center mt-6">
                     <Button onClick={onRestart} className="w-full sm:w-auto px-8 font-bold uppercase tracking-widest">

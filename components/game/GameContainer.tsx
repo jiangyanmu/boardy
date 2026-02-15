@@ -6,6 +6,7 @@ import { Board as BoardType, Player, getValidMoves, calculateScore } from '@/lib
 import { makeMove, resetGame } from '@/app/actions/game';
 import { useAI } from '@/hooks/useAI';
 import { GameOverDialog } from './GameOverDialog';
+import { Button } from '@/components/ui/button';
 
 interface GameContainerProps {
     gameId: string;
