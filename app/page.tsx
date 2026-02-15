@@ -23,12 +23,7 @@ export default async function Home() {
         <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-zinc-50">
             <h1 className="text-4xl font-black mb-8 tracking-tighter text-zinc-900 uppercase">Boardy Othello</h1>
             
-            <GameInfo 
-                turn={game.turn as any} 
-                score={score} 
-                status={game.status} 
-            />
-
+            {/* GameInfo is now inside GameContainer to share sync state */}
             <GameContainer 
                 gameId={game.id}
                 initialBoard={board}

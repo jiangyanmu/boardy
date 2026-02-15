@@ -82,6 +82,19 @@ export async function resetGame(gameId: string) {
     return updatedGame;
 }
 
+export async function syncGame(gameId: string, board: any[][], turn: string, status: string, winner: string | null) {
+    const updatedGame = await prisma.game.update({
+        where: { id: gameId },
+        data: {
+            board: JSON.stringify(board),
+            turn,
+            status,
+            winner,
+        },
+    });
+    return updatedGame;
+}
+
 function calculateScoreLocally(board: any[][]) {
     let black = 0;
     let white = 0;
