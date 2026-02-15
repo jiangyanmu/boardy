@@ -4,7 +4,7 @@ import { Player } from '@/lib/othello';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { Cloud, CloudOff, RefreshCw } from 'lucide-react';
+import { Cloud, RefreshCw } from 'lucide-react';
 
 interface GameInfoProps {
     turn: Player;
@@ -15,50 +15,49 @@ interface GameInfoProps {
 
 export function GameInfo({ turn, score, status, isSyncing }: GameInfoProps) {
     return (
-        <Card className="w-full max-w-[600px] mb-6">
-            <CardContent className="relative flex items-center justify-between p-6">
-                {/* Sync Indicator */}
-                <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] text-zinc-400 font-mono uppercase">
+        <div className="w-full max-w-200 mb-4 flex items-center justify-between px-2">
+            <div className="flex items-center gap-6">
+                <div className="flex items-center gap-2">
+                    <div className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md",
+                        turn === 'BLACK' ? "bg-zinc-900 ring-2 ring-zinc-400 ring-offset-2 scale-110" : "bg-zinc-800 opacity-40"
+                    )}>
+                        <span className="text-white text-sm font-black tabular-nums">{score.BLACK}</span>
+                    </div>
+                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Black</span>
+                </div>
+
+                <div className="h-6 w-px bg-zinc-200" />
+
+                <div className="flex items-center gap-2">
+                    <div className={cn(
+                        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md",
+                        turn === 'WHITE' ? "bg-zinc-100 ring-2 ring-emerald-500 ring-offset-2 scale-110" : "bg-zinc-200 opacity-40"
+                    )}>
+                        <span className="text-zinc-900 text-sm font-black tabular-nums">{score.WHITE}</span>
+                    </div>
+                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">White</span>
+                </div>
+            </div>
+
+            <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-1 text-[8px] text-zinc-400 font-mono uppercase">
                     {isSyncing ? (
                         <>
-                            <RefreshCw className="w-3 h-3 animate-spin" />
+                            <RefreshCw className="w-2.5 h-2.5 animate-spin" />
                             <span>Syncing</span>
                         </>
                     ) : (
                         <>
-                            <Cloud className="w-3 h-3" />
+                            <Cloud className="w-2.5 h-2.5" />
                             <span>Synced</span>
                         </>
                     )}
                 </div>
-                <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-medium text-zinc-500 uppercase tracking-wider">Black</span>
-                    <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 rounded-full bg-zinc-900 border border-zinc-700" />
-                        <span className="text-3xl font-bold">{score.BLACK}</span>
-                    </div>
-                    {turn === 'BLACK' && status === 'IN_PROGRESS' && (
-                        <Badge variant="default" className="bg-zinc-900">Your Turn</Badge>
-                    )}
-                </div>
-
-                <div className="text-center">
-                    <Badge variant="outline" className="px-4 py-1">
-                        {status === 'IN_PROGRESS' ? 'MATCH IN PROGRESS' : 'GAME OVER'}
-                    </Badge>
-                </div>
-
-                <div className="flex flex-col items-center gap-2">
-                    <span className="text-sm font-medium text-zinc-500 uppercase tracking-wider">White</span>
-                    <div className="flex items-center gap-3">
-                        <div className="w-4 h-4 rounded-full bg-zinc-100 border border-zinc-300" />
-                        <span className="text-3xl font-bold">{score.WHITE}</span>
-                    </div>
-                    {turn === 'WHITE' && status === 'IN_PROGRESS' && (
-                        <Badge variant="secondary">AI Thinking</Badge>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
+                <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-black tracking-widest h-5 border-zinc-200 text-zinc-400">
+                    {status === 'IN_PROGRESS' ? 'LIVE' : 'FINISHED'}
+                </Badge>
+            </div>
+        </div>
     );
 }

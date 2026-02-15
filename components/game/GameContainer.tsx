@@ -18,48 +18,40 @@ interface GameContainerProps {
 }
 
 export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus, initialWinner }: GameContainerProps) {
-    // 1. Initialize state from localStorage if available, otherwise use props
-    const [board, setBoard] = useState<BoardType>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem(`boardy-othello-board-${gameId}`);
-            if (saved) return JSON.parse(saved);
-        }
-        return initialBoard;
-    });
-    const [turn, setTurn] = useState<Player>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem(`boardy-othello-turn-${gameId}`);
-            if (saved) return saved as Player;
-        }
-        return initialTurn;
-    });
-    const [status, setStatus] = useState(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem(`boardy-othello-status-${gameId}`);
-            if (saved) return saved;
-        }
-        return initialStatus;
-    });
-    const [winner, setWinner] = useState<Player | 'DRAW' | null>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem(`boardy-othello-winner-${gameId}`);
-            if (saved) return saved as any;
-        }
-        return initialWinner;
-    });
+    // 1. Initialize state from props (matches Server Side Rendering)
+    const [board, setBoard] = useState<BoardType>(initialBoard);
+    const [turn, setTurn] = useState<Player>(initialTurn);
+    const [status, setStatus] = useState(initialStatus);
+    const [winner, setWinner] = useState<Player | 'DRAW' | null>(initialWinner);
+    const [isMounted, setIsMounted] = useState(false);
 
     const [isPending, startTransition] = useTransition();
     const isPendingRef = useRef(isPending);
     const { getAIMove } = useAI();
 
-    // 2. Persist state to localStorage on every change
+    // 2. On mount, load from localStorage if available
     useEffect(() => {
+        setIsMounted(true);
+        const savedBoard = localStorage.getItem(`boardy-othello-board-${gameId}`);
+        const savedTurn = localStorage.getItem(`boardy-othello-turn-${gameId}`);
+        const savedStatus = localStorage.getItem(`boardy-othello-status-${gameId}`);
+        const savedWinner = localStorage.getItem(`boardy-othello-winner-${gameId}`);
+
+        if (savedBoard) setBoard(JSON.parse(savedBoard));
+        if (savedTurn) setTurn(savedTurn as Player);
+        if (savedStatus) setStatus(savedStatus);
+        if (savedWinner) setWinner(savedWinner as any);
+    }, [gameId]);
+
+    // 3. Persist state to localStorage on every change
+    useEffect(() => {
+        if (!isMounted) return;
         localStorage.setItem(`boardy-othello-board-${gameId}`, JSON.stringify(board));
         localStorage.setItem(`boardy-othello-turn-${gameId}`, turn);
         localStorage.setItem(`boardy-othello-status-${gameId}`, status);
         if (winner) localStorage.setItem(`boardy-othello-winner-${gameId}`, winner);
         else localStorage.removeItem(`boardy-othello-winner-${gameId}`);
-    }, [board, turn, status, winner, gameId]);
+    }, [board, turn, status, winner, gameId, isMounted]);
 
     // Sync ref with isPending state
     useEffect(() => {
