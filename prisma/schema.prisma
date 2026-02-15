@@ -1,0 +1,19 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Game {
+  id          String   @id @default(uuid())
+  board       String   // JSON stringified 8x8 array
+  turn        String   // "BLACK" | "WHITE"
+  status      String   // "IN_PROGRESS" | "COMPLETED"
+  winner      String?  // "BLACK" | "WHITE" | "DRAW"
+  difficulty  Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
