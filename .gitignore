@@ -43,3 +43,8 @@ next-env.d.ts
 # sqlite
 *.db
 *.db-journal
+
+# pwa
+public/sw.js*
+public/workbox-*.js
+public/swe-worker-*.js

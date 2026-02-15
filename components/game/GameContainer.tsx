@@ -171,13 +171,12 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                 board={board}
                 validMoves={validMoves}
                 onMove={handleMove}
-                disabled={isPending || status !== 'IN_PROGRESS'}
+                disabled={status !== 'IN_PROGRESS'}
             />
 
             <Button
                 variant="outline"
                 onClick={handleRestart}
-                disabled={isPending}
                 className="font-bold uppercase tracking-widest px-8"
             >
                 New Game

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -16,12 +16,19 @@ export const metadata: Metadata = {
   title: "Boardy Othello",
   description: "A strategic Othello game with offline AI support.",
   manifest: "/manifest.json",
-  themeColor: "#065f46",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Othello",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#065f46",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export default function RootLayout({
