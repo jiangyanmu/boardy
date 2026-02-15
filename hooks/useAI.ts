@@ -7,7 +7,7 @@ export function useAI() {
     const workerRef = useRef<Worker | null>(null);
 
     useEffect(() => {
-        workerRef.current = new Worker(new URL('../public/workers/ai-worker.js', import.meta.url));
+        workerRef.current = new Worker('/workers/ai-worker.js');
         return () => {
             workerRef.current?.terminate();
         };

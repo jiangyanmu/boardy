@@ -16,7 +16,7 @@ export function Board({ board, validMoves, onMove, disabled }: BoardProps) {
     };
 
     return (
-        <div className="grid grid-cols-8 grid-rows-8 w-full max-w-[600px] aspect-square bg-emerald-800 border-4 border-emerald-950 rounded-sm shadow-2xl overflow-hidden">
+        <div className="grid grid-cols-8 grid-rows-8 w-full max-w-150 aspect-square bg-emerald-800 border-4 border-emerald-950 rounded-sm shadow-2xl overflow-hidden">
             {board.map((row, y) =>
                 row.map((cell, x) => (
                     <Cell

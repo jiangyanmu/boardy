@@ -1,7 +1,7 @@
 'use server';
 
 import prisma from '@/lib/prisma';
-import { createInitialBoard, applyMove, getValidMoves, isGameOver, Player } from '@/lib/othello';
+import { createInitialBoard, applyMove, getValidMoves, isGameOver, Player, isValidMove } from '@/lib/othello';
 import { revalidatePath } from 'next/cache';
 
 export async function createGame() {
@@ -16,13 +16,26 @@ export async function createGame() {
     return game;
 }
 
-export async function makeMove(gameId: string, x: number, y: number, player: Player) {
+export async function makeMove(gameId: string, x: number, y: number) {
     const game = await prisma.game.findUnique({ where: { id: gameId } });
     if (!game) throw new Error('Game not found');
     if (game.status !== 'IN_PROGRESS') throw new Error('Game is over');
-    if (game.turn !== player) throw new Error('Not your turn');
-
+    
+    const player = game.turn as Player;
     const board = JSON.parse(game.board);
+    
+    // Check if move is valid before applying, for logging purposes
+    const isValid = isValidMove(board, x, y, player);
+    if (!isValid) {
+        console.error(`Invalid Move Attempted: GameID=${gameId}, Player=${player}, Move=(${x},${y})`);
+        console.error(`Current Board: ${game.board}`);
+        const validMoves = getValidMoves(board, player);
+        console.error(`Valid Moves for ${player} were: ${JSON.stringify(validMoves)}`);
+        
+        // Instead of crashing, let's return the current game state to force a client re-sync
+        return game;
+    }
+
     const newBoard = applyMove(board, x, y, player);
     
     let nextTurn: Player = player === 'BLACK' ? 'WHITE' : 'BLACK';
