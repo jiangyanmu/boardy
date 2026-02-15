@@ -55,6 +55,20 @@ export async function makeMove(gameId: string, x: number, y: number, player: Pla
     return updatedGame;
 }
 
+export async function resetGame(gameId: string) {
+    const updatedGame = await prisma.game.update({
+        where: { id: gameId },
+        data: {
+            board: JSON.stringify(createInitialBoard()),
+            turn: 'BLACK',
+            status: 'IN_PROGRESS',
+            winner: null,
+        },
+    });
+    revalidatePath('/');
+    return updatedGame;
+}
+
 function calculateScoreLocally(board: any[][]) {
     let black = 0;
     let white = 0;

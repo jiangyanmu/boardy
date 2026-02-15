@@ -34,6 +34,7 @@ export default async function Home() {
                 initialBoard={board}
                 initialTurn={game.turn as any}
                 initialStatus={game.status}
+                initialWinner={game.winner as any}
             />
         </main>
     );
