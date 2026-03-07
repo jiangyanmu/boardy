@@ -75,8 +75,8 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         if (turn === 'WHITE' && status === 'IN_PROGRESS') {
             const triggerAI = async () => {
                 const boardAtStart = JSON.stringify(board);
-                // Increased delay for better UX
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Rapid AI response for better game pace
+                await new Promise(resolve => setTimeout(resolve, 800));
                 if (isCancelled) return;
 
                 const move = await getAIMove(board, 'WHITE', 1);
