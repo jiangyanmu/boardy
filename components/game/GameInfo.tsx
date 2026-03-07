@@ -1,8 +1,8 @@
 'use client';
 
+import { memo } from 'react';
 import { Player } from '@/lib/othello';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Cloud, RefreshCw } from 'lucide-react';
 
@@ -13,17 +13,17 @@ interface GameInfoProps {
     isSyncing?: boolean;
 }
 
-export function GameInfo({ turn, score, status, isSyncing }: GameInfoProps) {
+export const GameInfo = memo(function GameInfo({ turn, score, status, isSyncing }: GameInfoProps) {
     return (
         <div className="w-full flex flex-col gap-3 lg:gap-4 max-w-125 lg:max-w-none mx-auto">
             {/* Players Score Area */}
             <div className="grid grid-cols-2 gap-2 lg:gap-3">
                 {/* Black Player Card */}
                 <div className={cn(
-                    "relative overflow-hidden p-3 lg:p-4 rounded-xl border-2 transition-all duration-300",
+                    "relative overflow-hidden p-3 lg:p-4 rounded-xl border-2 transition-all duration-500",
                     turn === 'BLACK'
-                        ? "bg-zinc-900 border-zinc-900 shadow-lg shadow-zinc-200 lg:-translate-y-1"
-                        : "bg-white border-zinc-100 opacity-60"
+                        ? "bg-zinc-900 border-zinc-900 shadow-lg lg:-translate-y-1"
+                        : "bg-white border-zinc-100 opacity-40"
                 )}>
                     <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-400">Black</span>
@@ -32,24 +32,26 @@ export function GameInfo({ turn, score, status, isSyncing }: GameInfoProps) {
                             turn === 'BLACK' ? "text-white" : "text-zinc-900"
                         )}>{score.BLACK}</span>
                     </div>
+                    {/* Static indicator for better mobile performance */}
                     {turn === 'BLACK' && (
-                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     )}
                 </div>
 
                 {/* White Player Card */}
                 <div className={cn(
-                    "relative overflow-hidden p-3 lg:p-4 rounded-xl border-2 transition-all duration-300",
+                    "relative overflow-hidden p-3 lg:p-4 rounded-xl border-2 transition-all duration-500",
                     turn === 'WHITE'
                         ? "bg-zinc-100 border-zinc-200 shadow-lg shadow-zinc-100 lg:-translate-y-1"
-                        : "bg-white border-zinc-100 opacity-60"
+                        : "bg-white border-zinc-100 opacity-40"
                 )}>
                     <div className="flex flex-col gap-0.5">
                         <span className="text-[9px] lg:text-[10px] font-black text-zinc-400 uppercase tracking-widest">White</span>
                         <span className="text-2xl lg:text-3xl font-black text-zinc-900 tabular-nums leading-none">{score.WHITE}</span>
                     </div>
+                    {/* Static indicator for better mobile performance */}
                     {turn === 'WHITE' && (
-                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full" />
                     )}
                 </div>
             </div>
@@ -81,4 +83,4 @@ export function GameInfo({ turn, score, status, isSyncing }: GameInfoProps) {
             </div>
         </div>
     );
-}
+});
