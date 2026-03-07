@@ -15,46 +15,67 @@ interface GameInfoProps {
 
 export function GameInfo({ turn, score, status, isSyncing }: GameInfoProps) {
     return (
-        <div className="w-full max-w-200 mb-4 flex items-center justify-between px-2">
-            <div className="flex items-center gap-6">
-                <div className="flex items-center gap-2">
-                    <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md",
-                        turn === 'BLACK' ? "bg-zinc-900 ring-2 ring-zinc-400 ring-offset-2 scale-110" : "bg-zinc-800 opacity-40"
-                    )}>
-                        <span className="text-white text-sm font-black tabular-nums">{score.BLACK}</span>
+        <div className="w-full flex flex-col gap-3 lg:gap-4 max-w-125 lg:max-w-none mx-auto">
+            {/* Players Score Area */}
+            <div className="grid grid-cols-2 gap-2 lg:gap-3">
+                {/* Black Player Card */}
+                <div className={cn(
+                    "relative overflow-hidden p-3 lg:p-4 rounded-xl border-2 transition-all duration-300",
+                    turn === 'BLACK'
+                        ? "bg-zinc-900 border-zinc-900 shadow-lg shadow-zinc-200 lg:-translate-y-1"
+                        : "bg-white border-zinc-100 opacity-60"
+                )}>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] lg:text-[10px] font-black uppercase tracking-widest text-zinc-400">Black</span>
+                        <span className={cn(
+                            "text-2xl lg:text-3xl font-black tabular-nums leading-none",
+                            turn === 'BLACK' ? "text-white" : "text-zinc-900"
+                        )}>{score.BLACK}</span>
                     </div>
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">Black</span>
+                    {turn === 'BLACK' && (
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    )}
                 </div>
 
-                <div className="h-6 w-px bg-zinc-200" />
-
-                <div className="flex items-center gap-2">
-                    <div className={cn(
-                        "w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 shadow-md",
-                        turn === 'WHITE' ? "bg-zinc-100 ring-2 ring-emerald-500 ring-offset-2 scale-110" : "bg-zinc-200 opacity-40"
-                    )}>
-                        <span className="text-zinc-900 text-sm font-black tabular-nums">{score.WHITE}</span>
+                {/* White Player Card */}
+                <div className={cn(
+                    "relative overflow-hidden p-3 lg:p-4 rounded-xl border-2 transition-all duration-300",
+                    turn === 'WHITE'
+                        ? "bg-zinc-100 border-zinc-200 shadow-lg shadow-zinc-100 lg:-translate-y-1"
+                        : "bg-white border-zinc-100 opacity-60"
+                )}>
+                    <div className="flex flex-col gap-0.5">
+                        <span className="text-[9px] lg:text-[10px] font-black text-zinc-400 uppercase tracking-widest">White</span>
+                        <span className="text-2xl lg:text-3xl font-black text-zinc-900 tabular-nums leading-none">{score.WHITE}</span>
                     </div>
-                    <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">White</span>
+                    {turn === 'WHITE' && (
+                        <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    )}
                 </div>
             </div>
 
-            <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center gap-1 text-[8px] text-zinc-400 font-mono uppercase">
+            {/* Status Footer */}
+            <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-1 text-[9px] lg:text-[10px] text-zinc-400 font-bold uppercase tracking-tight">
                     {isSyncing ? (
                         <>
-                            <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                            <RefreshCw className="w-2.5 h-2.5 lg:w-3 lg:h-3 animate-spin text-emerald-600" />
                             <span>Syncing</span>
                         </>
                     ) : (
                         <>
-                            <Cloud className="w-2.5 h-2.5" />
+                            <Cloud className="w-2.5 h-2.5 lg:w-3 lg:h-3 text-emerald-600" />
                             <span>Synced</span>
                         </>
                     )}
                 </div>
-                <Badge variant="outline" className="px-1.5 py-0 text-[10px] font-black tracking-widest h-5 border-zinc-200 text-zinc-400">
+                <Badge
+                    variant="outline"
+                    className={cn(
+                        "px-1.5 py-0 text-[8px] lg:text-[10px] font-black tracking-widest h-4 lg:h-5 border-zinc-100 lg:border-zinc-200",
+                        status === 'IN_PROGRESS' ? "text-emerald-600 bg-emerald-50" : "text-zinc-400"
+                    )}
+                >
                     {status === 'IN_PROGRESS' ? 'LIVE' : 'FINISHED'}
                 </Badge>
             </div>
