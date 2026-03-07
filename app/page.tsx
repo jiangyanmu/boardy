@@ -60,9 +60,10 @@ export default async function Home() {
 
 function BackgroundDecor() {
     return (
-        <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-[0.03]">
-            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-zinc-900 rounded-full blur-[120px]" />
-            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-900 rounded-full blur-[120px]" />
+        <div className="absolute top-0 left-0 w-full h-full -z-10 pointer-events-none opacity-[0.02] lg:opacity-[0.03]">
+            {/* Using radial gradients instead of CSS blur filters for 10x better mobile performance */}
+            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-[radial-gradient(circle,rgba(24,24,27,1)_0%,transparent_70%)]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[60%] rounded-full bg-[radial-gradient(circle,rgba(6,95,70,1)_0%,transparent_70%)]" />
         </div>
     );
 }

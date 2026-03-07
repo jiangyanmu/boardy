@@ -24,7 +24,7 @@ export const Cell = memo(function Cell({ x, y, value, isValidMove, onClick }: Ce
         >
             {value && <Disc color={value} />}
             {isValidMove && !value && (
-                <div className="w-3 h-3 rounded-full bg-emerald-900/20 animate-pulse" />
+                <div className="w-3 h-3 rounded-full bg-emerald-900/20 lg:animate-pulse" />
             )}
         </div>
     );
