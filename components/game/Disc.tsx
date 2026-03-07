@@ -16,12 +16,13 @@ export function Disc({ color }: DiscProps) {
             }}
             transition={{
                 duration: 0.4,
-                type: 'spring',
-                stiffness: 250,
-                damping: 20,
+                ease: [0.4, 0, 0.2, 1], // Optimized cubic-bezier for smooth motion
             }}
             className="relative w-[85%] h-[85%] preserve-3d"
-            style={{ transformStyle: 'preserve-3d' }}
+            style={{ 
+                transformStyle: 'preserve-3d',
+                willChange: 'transform' // Tell browser to GPU-accelerate this element
+            }}
         >
             {/* Black Side */}
             <div
