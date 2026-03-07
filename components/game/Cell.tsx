@@ -1,19 +1,22 @@
 'use client';
 
-import { Cell as CellType, Player } from '@/lib/othello';
+import { memo } from 'react';
+import { Cell as CellType } from '@/lib/othello';
 import { Disc } from './Disc';
 import { cn } from '@/lib/utils';
 
 interface CellProps {
+    x: number;
+    y: number;
     value: CellType;
     isValidMove: boolean;
-    onClick: () => void;
+    onClick: (x: number, y: number) => void;
 }
 
-export function Cell({ value, isValidMove, onClick }: CellProps) {
+export const Cell = memo(function Cell({ x, y, value, isValidMove, onClick }: CellProps) {
     return (
         <div
-            onClick={onClick}
+            onClick={() => isValidMove && onClick(x, y)}
             className={cn(
                 "relative flex items-center justify-center w-full aspect-square border-[0.5px] border-emerald-900/30 cursor-pointer transition-colors",
                 isValidMove ? "hover:bg-emerald-600/30" : "hover:bg-emerald-700/20"
@@ -25,4 +28,9 @@ export function Cell({ value, isValidMove, onClick }: CellProps) {
             )}
         </div>
     );
-}
+}, (prev, next) => {
+    // Only re-render if the value changes or the move validity changes
+    // Coordinates and onClick are considered stable enough or matched by logic
+    return prev.value === next.value && prev.isValidMove === next.isValidMove;
+});
+

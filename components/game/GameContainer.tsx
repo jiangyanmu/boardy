@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition, useEffect, useRef } from 'react';
+import { useState, useTransition, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Board } from './Board';
 import { Board as BoardType, Player, getValidMoves, calculateScore, applyMove } from '@/lib/othello';
 import { makeMove, resetGame, syncGame } from '@/app/actions/game';
@@ -26,6 +26,17 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
     const [isMounted, setIsMounted] = useState(false);
     const [showGameOver, setShowGameOver] = useState(false);
 
+    // Refs to store the latest state for use in stable callbacks (Prevents Stale Closures)
+    const boardRef = useRef(board);
+    const turnRef = useRef(turn);
+    const statusRef = useRef(status);
+
+    useEffect(() => {
+        boardRef.current = board;
+        turnRef.current = turn;
+        statusRef.current = status;
+    }, [board, turn, status]);
+
     const [isPending, startTransition] = useTransition();
     const isPendingRef = useRef(isPending);
     const { getAIMove } = useAI();
@@ -38,9 +49,20 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         const savedStatus = localStorage.getItem(`boardy-othello-status-${gameId}`);
         const savedWinner = localStorage.getItem(`boardy-othello-winner-${gameId}`);
 
-        if (savedBoard) setBoard(JSON.parse(savedBoard));
-        if (savedTurn) setTurn(savedTurn as Player);
-        if (savedStatus) setStatus(savedStatus);
+        if (savedBoard) {
+            const parsed = JSON.parse(savedBoard);
+            setBoard(parsed);
+            boardRef.current = parsed;
+        }
+        if (savedTurn) {
+            const t = savedTurn as Player;
+            setTurn(t);
+            turnRef.current = t;
+        }
+        if (savedStatus) {
+            setStatus(savedStatus);
+            statusRef.current = savedStatus;
+        }
         if (savedWinner) setWinner(savedWinner as any);
     }, [gameId]);
 
@@ -65,8 +87,11 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         isPendingRef.current = isPending;
     }, [isPending]);
 
-    const validMoves = getValidMoves(board, turn);
-    const score = calculateScore(board);
+    // --- Performance Optimizations ---
+    
+    // rerender-derived-state-no-effect: Memoize expensive calculations
+    const validMoves = useMemo(() => getValidMoves(board, turn), [board, turn]);
+    const score = useMemo(() => calculateScore(board), [board]);
 
     // AI Logic
     useEffect(() => {
@@ -75,7 +100,7 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         if (turn === 'WHITE' && status === 'IN_PROGRESS') {
             const triggerAI = async () => {
                 const boardAtStart = JSON.stringify(board);
-                // Rapid AI response for better game pace
+                // Rapid AI response
                 await new Promise(resolve => setTimeout(resolve, 800));
                 if (isCancelled) return;
 
@@ -94,16 +119,21 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         };
     }, [turn, status, board]);
 
-    const handleMove = async (x: number, y: number, force: boolean = false) => {
-        if (!force && status !== 'IN_PROGRESS') return;
+    // STABLE handleMove using refs to avoid stale closure issues
+    const handleMove = useCallback(async (x: number, y: number, force: boolean = false) => {
+        const currentStatus = statusRef.current;
+        const currentBoard = boardRef.current;
+        const currentTurn = turnRef.current;
 
-        const newBoard = applyMove(board, x, y, turn);
-        let nextTurn: Player = turn === 'BLACK' ? 'WHITE' : 'BLACK';
+        if (!force && currentStatus !== 'IN_PROGRESS') return;
+
+        const newBoard = applyMove(currentBoard, x, y, currentTurn);
+        let nextTurn: Player = currentTurn === 'BLACK' ? 'WHITE' : 'BLACK';
         let newStatus = 'IN_PROGRESS';
         let newWinner: Player | 'DRAW' | null = null;
 
         if (getValidMoves(newBoard, nextTurn).length === 0) {
-            nextTurn = turn;
+            nextTurn = currentTurn; 
             if (getValidMoves(newBoard, nextTurn).length === 0) {
                 newStatus = 'COMPLETED';
                 const finalScore = calculateScore(newBoard);
@@ -123,11 +153,11 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                 console.error("Background sync failed:", error);
             }
         });
-    };
+    }, [gameId]); // Only gameId is needed as a dependency
 
-    const handleRestart = async () => {
+    const handleRestart = useCallback(async () => {
         const initialBoardState = [[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,'WHITE','BLACK',null,null,null],[null,null,null,'BLACK','WHITE',null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]];
-
+        
         setBoard(initialBoardState as BoardType);
         setTurn('BLACK');
         setStatus('IN_PROGRESS');
@@ -146,11 +176,11 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                 console.error("Restart sync failed:", error);
             }
         });
-    };
+    }, [gameId]);
 
     return (
         <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12 px-4 overflow-hidden lg:overflow-visible">
-
+            
             <div className="w-full lg:hidden max-w-125 mb-2">
                 <GameInfo
                     turn={turn}
