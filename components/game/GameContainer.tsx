@@ -18,18 +18,19 @@ interface GameContainerProps {
 }
 
 export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus, initialWinner }: GameContainerProps) {
-    // 1. Initialize state from props (matches Server Side Rendering)
+    // 1. State Management
     const [board, setBoard] = useState<BoardType>(initialBoard);
     const [turn, setTurn] = useState<Player>(initialTurn);
     const [status, setStatus] = useState(initialStatus);
     const [winner, setWinner] = useState<Player | 'DRAW' | null>(initialWinner);
     const [isMounted, setIsMounted] = useState(false);
+    const [showGameOver, setShowGameOver] = useState(false);
 
     const [isPending, startTransition] = useTransition();
     const isPendingRef = useRef(isPending);
     const { getAIMove } = useAI();
 
-    // 2. On mount, load from localStorage if available
+    // 2. Load and Sync Local Storage
     useEffect(() => {
         setIsMounted(true);
         const savedBoard = localStorage.getItem(`boardy-othello-board-${gameId}`);
@@ -43,7 +44,14 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         if (savedWinner) setWinner(savedWinner as any);
     }, [gameId]);
 
-    // 3. Persist state to localStorage on every change
+    // 3. Reactive Dialog Trigger
+    useEffect(() => {
+        if (status === 'COMPLETED' && isMounted) {
+            setShowGameOver(true);
+        }
+    }, [status, isMounted, winner]);
+
+    // 4. State Persistence
     useEffect(() => {
         if (!isMounted) return;
         localStorage.setItem(`boardy-othello-board-${gameId}`, JSON.stringify(board));
@@ -53,7 +61,6 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         else localStorage.removeItem(`boardy-othello-winner-${gameId}`);
     }, [board, turn, status, winner, gameId, isMounted]);
 
-    // Sync ref with isPending state
     useEffect(() => {
         isPendingRef.current = isPending;
     }, [isPending]);
@@ -61,26 +68,20 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
     const validMoves = getValidMoves(board, turn);
     const score = calculateScore(board);
 
+    // AI Logic
     useEffect(() => {
         let isCancelled = false;
 
         if (turn === 'WHITE' && status === 'IN_PROGRESS') {
             const triggerAI = async () => {
                 const boardAtStart = JSON.stringify(board);
-
-                // Added artificial delay for better UX
                 await new Promise(resolve => setTimeout(resolve, 800));
                 if (isCancelled) return;
 
                 const move = await getAIMove(board, 'WHITE', 1);
 
                 if (move && !isCancelled) {
-                    if (JSON.stringify(board) !== boardAtStart) {
-                        return;
-                    }
-
-                    // For Local-First, AI doesn't need to wait for isPending (the database sync)
-                    // unless we want to preserve strict sequence.
+                    if (JSON.stringify(board) !== boardAtStart) return;
                     handleMove(move.x, move.y, true);
                 }
             };
@@ -95,15 +96,13 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
     const handleMove = async (x: number, y: number, force: boolean = false) => {
         if (!force && status !== 'IN_PROGRESS') return;
 
-        // --- Pure Local Logic (Authoritative) ---
         const newBoard = applyMove(board, x, y, turn);
         let nextTurn: Player = turn === 'BLACK' ? 'WHITE' : 'BLACK';
         let newStatus = 'IN_PROGRESS';
         let newWinner: Player | 'DRAW' | null = null;
 
-        // Check if next player has moves
         if (getValidMoves(newBoard, nextTurn).length === 0) {
-            nextTurn = turn; // Skip turn
+            nextTurn = turn; 
             if (getValidMoves(newBoard, nextTurn).length === 0) {
                 newStatus = 'COMPLETED';
                 const finalScore = calculateScore(newBoard);
@@ -111,13 +110,11 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
             }
         }
 
-        // Update local state instantly
         setBoard(newBoard);
         setTurn(nextTurn);
         setStatus(newStatus);
         setWinner(newWinner);
 
-        // Sync to Supabase in background
         startTransition(async () => {
             try {
                 await syncGame(gameId, newBoard, nextTurn, newStatus, newWinner as any);
@@ -128,22 +125,22 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
     };
 
     const handleRestart = async () => {
-        const initialBoard = [[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,'WHITE','BLACK',null,null,null],[null,null,null,'BLACK','WHITE',null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]];
-        setBoard(initialBoard as BoardType);
+        const initialBoardState = [[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,'WHITE','BLACK',null,null,null],[null,null,null,'BLACK','WHITE',null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]];
+        
+        setBoard(initialBoardState as BoardType);
         setTurn('BLACK');
         setStatus('IN_PROGRESS');
         setWinner(null);
+        setShowGameOver(false);
 
-        // Clear local storage
         localStorage.removeItem(`boardy-othello-board-${gameId}`);
         localStorage.removeItem(`boardy-othello-turn-${gameId}`);
         localStorage.removeItem(`boardy-othello-status-${gameId}`);
         localStorage.removeItem(`boardy-othello-winner-${gameId}`);
 
-        // Sync restart to Supabase
         startTransition(async () => {
             try {
-                await syncGame(gameId, initialBoard as BoardType, 'BLACK', 'IN_PROGRESS', null);
+                await syncGame(gameId, initialBoardState as BoardType, 'BLACK', 'IN_PROGRESS', null);
             } catch (error) {
                 console.error("Restart sync failed:", error);
             }
@@ -152,8 +149,7 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
 
     return (
         <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12 px-4 overflow-hidden lg:overflow-visible">
-
-            {/* Mobile: Game Info at Top (Responsive max-width) */}
+            
             <div className="w-full lg:hidden max-w-125 mb-2">
                 <GameInfo
                     turn={turn}
@@ -163,7 +159,6 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                 />
             </div>
 
-            {/* Left/Main Side: The Board */}
             <div className="w-full max-w-[min(90vw,480px)] lg:max-w-125 xl:max-w-150 shrink-0">
                 <Board
                     board={board}
@@ -173,12 +168,9 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                 />
             </div>
 
-            {/* Right/Side Side: Info & Controls */}
             <div className="w-full lg:w-80 flex flex-col gap-6">
                 <div className="bg-white p-4 lg:p-6 rounded-2xl shadow-sm border border-zinc-100">
                     <h2 className="hidden lg:block text-xs font-black text-zinc-400 uppercase tracking-widest mb-6">Game Status</h2>
-
-                    {/* Desktop only: Info inside the card */}
                     <div className="hidden lg:block mb-8">
                         <GameInfo
                             turn={turn}
@@ -187,7 +179,6 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                             isSyncing={isPending}
                         />
                     </div>
-
                     <div className="lg:pt-8 lg:border-t border-zinc-100 flex flex-col gap-3">
                         <Button
                             variant="default"
@@ -197,12 +188,10 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
                             New Game
                         </Button>
                         <p className="hidden lg:block text-[10px] text-center text-zinc-400 font-medium px-4 leading-relaxed">
-                            Othello is a strategy board game for two players, played on an 8×8 uncheckered board.
+                            Othello is a strategy board game for two players, played on an 8x8 uncheckered board.
                         </p>
                     </div>
                 </div>
-
-                {/* Desktop-only Help Section */}
                 <div className="hidden lg:block bg-zinc-100/50 p-6 rounded-2xl border border-dashed border-zinc-200">
                     <h3 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">How to play</h3>
                     <p className="text-xs text-zinc-500 leading-relaxed">
@@ -212,7 +201,8 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
             </div>
 
             <GameOverDialog
-                open={status === 'COMPLETED'}
+                open={showGameOver}
+                onOpenChange={setShowGameOver}
                 winner={winner}
                 score={score}
                 onRestart={handleRestart}
