@@ -75,7 +75,8 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         if (turn === 'WHITE' && status === 'IN_PROGRESS') {
             const triggerAI = async () => {
                 const boardAtStart = JSON.stringify(board);
-                await new Promise(resolve => setTimeout(resolve, 800));
+                // Increased delay for better UX
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 if (isCancelled) return;
 
                 const move = await getAIMove(board, 'WHITE', 1);
@@ -102,7 +103,7 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
         let newWinner: Player | 'DRAW' | null = null;
 
         if (getValidMoves(newBoard, nextTurn).length === 0) {
-            nextTurn = turn; 
+            nextTurn = turn;
             if (getValidMoves(newBoard, nextTurn).length === 0) {
                 newStatus = 'COMPLETED';
                 const finalScore = calculateScore(newBoard);
@@ -126,7 +127,7 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
 
     const handleRestart = async () => {
         const initialBoardState = [[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,'WHITE','BLACK',null,null,null],[null,null,null,'BLACK','WHITE',null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null],[null,null,null,null,null,null,null,null]];
-        
+
         setBoard(initialBoardState as BoardType);
         setTurn('BLACK');
         setStatus('IN_PROGRESS');
@@ -149,7 +150,7 @@ export function GameContainer({ gameId, initialBoard, initialTurn, initialStatus
 
     return (
         <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6 lg:gap-12 px-4 overflow-hidden lg:overflow-visible">
-            
+
             <div className="w-full lg:hidden max-w-125 mb-2">
                 <GameInfo
                     turn={turn}

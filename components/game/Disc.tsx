@@ -15,10 +15,10 @@ export function Disc({ color }: DiscProps) {
                 rotateY: color === 'BLACK' ? 0 : 180,
             }}
             transition={{
-                duration: 0.6,
+                duration: 0.8,
                 type: 'spring',
-                stiffness: 260,
-                damping: 20,
+                stiffness: 120,
+                damping: 24,
             }}
             className="relative w-[85%] h-[85%] preserve-3d"
             style={{ transformStyle: 'preserve-3d' }}
