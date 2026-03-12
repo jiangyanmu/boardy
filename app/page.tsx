@@ -18,7 +18,7 @@ export default async function Home() {
         const board = JSON.parse(game.board);
         
         return (
-            <main className="relative h-svh w-full flex flex-col items-center justify-between p-2 sm:p-4 lg:p-8 bg-white overflow-hidden">
+            <main className="relative h-dvh w-full flex flex-col items-center justify-between p-2 sm:p-4 lg:p-8 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] bg-white overflow-hidden">
                 <BackgroundDecor />
                 <Header />
                 <div className="w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
@@ -40,7 +40,7 @@ export default async function Home() {
         const fallbackBoard = createInitialBoard();
         
         return (
-            <main className="relative h-svh w-full flex flex-col items-center justify-between p-2 sm:p-4 lg:p-8 bg-white overflow-hidden">
+            <main className="relative h-dvh w-full flex flex-col items-center justify-between p-2 sm:p-4 lg:p-8 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] bg-white overflow-hidden">
                 <BackgroundDecor />
                 <Header isOffline={true} />
                 <div className="w-full flex-1 flex flex-col items-center justify-center overflow-hidden">
